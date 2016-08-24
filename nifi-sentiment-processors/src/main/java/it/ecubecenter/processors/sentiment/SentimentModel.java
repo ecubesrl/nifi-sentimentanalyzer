@@ -13,9 +13,14 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
-
-public class SentimentModel {
-private static SentimentModel instance = null;
+/**
+ * The class containing the model for the sentiment analysis.
+ * 
+ * @author gaido@ecubecenter.it
+ *
+ */
+class SentimentModel {
+	private static SentimentModel instance = null;
 	
 	public final static int VERY_NEGATIVE=0;
 	public final static int NEGATIVE=1;

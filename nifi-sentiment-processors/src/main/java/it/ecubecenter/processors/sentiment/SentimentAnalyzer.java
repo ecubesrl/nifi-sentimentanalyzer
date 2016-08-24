@@ -50,7 +50,13 @@ import java.util.concurrent.atomic.AtomicReference;
 	@WritesAttribute(attribute="X.sentiment.category", description="The overall sentiment category of the text. "+
 					"It can be \"Very Negative\", \"Negative\", \"Neutral\", \"Positive\" and \"Very Positive\"."),
 	@WritesAttribute(attribute="X.sentiment.sentences.scores", description="The detailed scores for each sentence in the text to be analyzed.")})
-
+/**
+ * This processor performs a sentiment analysis on the attribute specified (or the content of the Flow File if 
+ * no attribute is provided). The result of the analysis is returned in the attributes X.sentiment.category and X.sentiment.sentences.scores,
+ * where X is the name of the attribute to be analyzed
+ * @author gaido@ecubecenter.it
+ * 
+ */
 public class SentimentAnalyzer extends AbstractProcessor {
 
     public static final PropertyDescriptor LANGUAGE_PROPERTY = new PropertyDescriptor
