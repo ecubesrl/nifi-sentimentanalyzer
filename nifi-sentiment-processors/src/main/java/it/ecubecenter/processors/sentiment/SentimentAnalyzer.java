@@ -40,23 +40,24 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+
+/**
+ * This processor performs a sentiment analysis on the attribute specified (or the content of the Flow File if
+ * no attribute is provided). The result of the analysis is returned in the attributes X.sentiment.category and X.sentiment.sentences.scores,
+ * where X is the name of the attribute to be analyzed
+ * @author Marco Gaido, eCube srl (gaido@ecubecenter.it)
+ *
+ */
 @SideEffectFree
 @Tags({"sentiment","analysis","text"})
-@CapabilityDescription("This processor performs a sentiment analysis on the attribute specified (or the content of the Flow File if "+
-		"no attribute is provided). The result of the analysis is returned in the attributes X.sentiment.category and X.sentiment.sentences.scores, "+
-		"where X is the name of the attribute to be analyzed.")
-@ReadsAttributes({@ReadsAttribute(attribute="", description="")})
+@CapabilityDescription("This processor performs a sentiment analysis on the attribute specified (or the content of the Flow File if " +
+        "no attribute is provided). The result of the analysis is returned in the attributes X.sentiment.category and X.sentiment.sentences.scores, " +
+        "where X is the name of the attribute to be analyzed.")
+@ReadsAttributes({@ReadsAttribute(attribute = "the attribute specified in the proper property", description = "It must contain a text to be analyzed")})
 @WritesAttributes({
 	@WritesAttribute(attribute="X.sentiment.category", description="The overall sentiment category of the text. "+
 					"It can be \"Very Negative\", \"Negative\", \"Neutral\", \"Positive\" and \"Very Positive\"."),
 	@WritesAttribute(attribute="X.sentiment.sentences.scores", description="The detailed scores for each sentence in the text to be analyzed.")})
-/**
- * This processor performs a sentiment analysis on the attribute specified (or the content of the Flow File if 
- * no attribute is provided). The result of the analysis is returned in the attributes X.sentiment.category and X.sentiment.sentences.scores,
- * where X is the name of the attribute to be analyzed
- * @author gaido@ecubecenter.it
- * 
- */
 public class SentimentAnalyzer extends AbstractProcessor {
 
     public static final PropertyDescriptor LANGUAGE_PROPERTY = new PropertyDescriptor
@@ -115,12 +116,12 @@ public class SentimentAnalyzer extends AbstractProcessor {
 
     @Override
     protected void init(final ProcessorInitializationContext context) {
-        final List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
+        final List<PropertyDescriptor> descriptors = new ArrayList<>();
         descriptors.add(LANGUAGE_PROPERTY);
         descriptors.add(ATTRIBUTE_TO_ANALYZE_PROPERTY);
         this.descriptors = Collections.unmodifiableList(descriptors);
 
-        final Set<Relationship> relationships = new HashSet<Relationship>();
+        final Set<Relationship> relationships = new HashSet<>();
         relationships.add(SUCCESS_RELATIONSHIP);
         relationships.add(FAILURE_RELATIONSHIP);
         this.relationships = Collections.unmodifiableSet(relationships);
@@ -166,7 +167,7 @@ public class SentimentAnalyzer extends AbstractProcessor {
         }
         String stringToAnalyze = atomicStringToAnalyze.get();
         if(stringToAnalyze == null || stringToAnalyze.equals("")){
-        	log.warn("The attribut to be analyzed doesn't exist or it is empty.");
+        	log.warn("The attribute to be analyzed doesn't exist or it is empty.");
         	session.transfer(flowFile, FAILURE_RELATIONSHIP);
         	return;
         }
@@ -174,24 +175,22 @@ public class SentimentAnalyzer extends AbstractProcessor {
         SentimentModel model = SentimentModel.getInstance();
         
         List<double[]> sentiments = model.getSentencesSentiment(stringToAnalyze);
-        flowFile=session.putAttribute(flowFile, new StringBuilder(attributeToBeUsed).append(".sentiment.category").toString(), SentimentModel.getOverallSentiment(sentiments));
-        flowFile=session.putAttribute(flowFile, new StringBuilder(attributeToBeUsed).append(".sentiment.sentences.scores").toString(), stringifyListOfSentiments(sentiments));
-        
+        flowFile=session.putAttribute(flowFile, attributeToBeUsed + ".sentiment.category", SentimentModel.getOverallSentiment(sentiments));
+        flowFile=session.putAttribute(flowFile, attributeToBeUsed + ".sentiment.sentences.scores", stringifyListOfSentiments(sentiments));
+
         session.transfer(flowFile, SUCCESS_RELATIONSHIP);
     }
     
     
     private static String stringifyListOfSentiments(List<double[]> sentiments){
     	StringBuilder sb=new StringBuilder("[");
-    	Iterator<double[]> it = sentiments.iterator();
-    	while(it.hasNext()){
-    		double[] sent = it.next();
-    		sb.append("{\"Very Negative\":").append(sent[SentimentModel.VERY_NEGATIVE]).append(",");
-    		sb.append("\"Negative\":").append(sent[SentimentModel.NEGATIVE]).append(",");
-    		sb.append("\"Neutral\":").append(sent[SentimentModel.NEUTRAL]).append(",");
-    		sb.append("\"Positive\":").append(sent[SentimentModel.POSITIVE]).append(",");
-    		sb.append("\"Very Positive\":").append(sent[SentimentModel.VERY_POSITIVE]).append("},");
-    	}
+        for (double[] sent : sentiments) {
+            sb.append("{\"Very Negative\":").append(sent[SentimentModel.VERY_NEGATIVE]).append(",");
+            sb.append("\"Negative\":").append(sent[SentimentModel.NEGATIVE]).append(",");
+            sb.append("\"Neutral\":").append(sent[SentimentModel.NEUTRAL]).append(",");
+            sb.append("\"Positive\":").append(sent[SentimentModel.POSITIVE]).append(",");
+            sb.append("\"Very Positive\":").append(sent[SentimentModel.VERY_POSITIVE]).append("},");
+        }
     	sb.setCharAt(sb.length()-1,']');
     	return sb.toString();
     }
