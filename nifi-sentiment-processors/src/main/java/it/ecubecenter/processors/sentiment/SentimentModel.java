@@ -16,7 +16,7 @@ import edu.stanford.nlp.util.CoreMap;
 /**
  * The class containing the model for the sentiment analysis.
  * 
- * @author gaido@ecubecenter.it
+ * @author Marco Gaido, eCube srl (gaido@ecubecenter.it)
  *
  */
 class SentimentModel {
@@ -58,7 +58,7 @@ class SentimentModel {
 	     
 	    for(CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)){
 	    	SimpleMatrix prediction = RNNCoreAnnotations.getPredictions(
-	    			sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class));
+	    			sentence.get( SentimentCoreAnnotations.SentimentAnnotatedTree.class));
 	    	double[] predArray = new double[5];
 	    	predArray[VERY_NEGATIVE]=prediction.get(VERY_NEGATIVE);
 	    	predArray[NEGATIVE]=prediction.get(NEGATIVE);
