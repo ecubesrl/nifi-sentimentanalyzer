@@ -21,7 +21,7 @@ import org.apache.nifi.components.ValidationContext;
 import org.apache.nifi.components.ValidationResult;
 import org.apache.nifi.components.Validator;
 import org.apache.nifi.flowfile.FlowFile;
-import org.apache.nifi.logging.ProcessorLog;
+import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.nifi.annotation.behavior.ReadsAttribute;
@@ -144,7 +144,7 @@ public class SentimentAnalyzer extends AbstractProcessor {
 
     @Override
     public void onTrigger(final ProcessContext context, final ProcessSession session) throws ProcessException {
-    	final ProcessorLog log = this.getLogger();
+    	final ComponentLog log = getLogger();
     	final AtomicReference<String> atomicStringToAnalyze = new AtomicReference<>();
     	
         FlowFile flowFile = session.get();
